@@ -364,8 +364,8 @@ func TestGetCheckRunTitle(t *testing.T) {
 		Status:      sdk.StatusSuccess,
 	}
 	title := getCheckRunTitle(status)
-	if *title != "Deploy to OpenFaaS" {
-		t.Fatalf("Expected %s but got %s", "Deploy to OpenFaaS", *title)
+	if *title != "Deploy to Axcel" {
+		t.Fatalf("Expected %s but got %s", "Deploy to Axcel", *title)
 	}
 
 	status.Context = sdk.BuildFunctionContext("hello-go")
