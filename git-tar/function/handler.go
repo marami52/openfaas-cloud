@@ -115,6 +115,7 @@ func Handle(req []byte) []byte {
 	}
 
 	stack, err := parseYAML(pushEvent, clonePath)
+
 	if err != nil {
 		log.Println("parseYAML ", err.Error())
 		status.AddStatus(sdk.StatusFailure, "parseYAML error : "+err.Error(), sdk.StackContext)
@@ -125,6 +126,25 @@ func Handle(req []byte) []byte {
 		os.Exit(-1)
 	}
 
+	if len(stack.Functions) > 3 {
+		status.AddStatus(sdk.StatusFailure, "Maximum number of functions/deployment is 3 ", sdk.StackContext)
+		statusErr := reportStatus(status, pushEvent.SCM)
+		if statusErr != nil {
+			log.Printf(statusErr.Error())
+		}
+		os.Exit(-1)
+	}
+
+	isCustomer, err := checkCustomer(pushEvent.Repository.Owner.Login)
+
+	if !isCustomer {
+		status.AddStatus(sdk.StatusFailure, "Deployment faild: "+err.Error(), sdk.StackContext)
+		statusErr := reportStatus(status, pushEvent.SCM)
+		if statusErr != nil {
+			log.Printf(statusErr.Error())
+		}
+		os.Exit(-1)
+	}
 	if hasDockerfileFunction(stack.Functions) && !isDockerfileEnabled() {
 		status.AddStatus(sdk.StatusFailure, "detected a dockerfile function but feature is not enabled", sdk.StackContext)
 		statusErr := reportStatus(status, pushEvent.SCM)
@@ -229,6 +249,40 @@ func Handle(req []byte) []byte {
 	sdk.PostAudit(auditEvent)
 
 	return []byte(deploymentMessage)
+}
+
+func checkCustomer(owner string) (bool, error) {
+
+	axcelURL := os.Getenv("axcel_url")
+	var err error
+
+	c := http.Client{
+		Timeout: time.Second * 3,
+	}
+
+	request, _ := http.NewRequest(http.MethodGet, axcelURL+"/api/auth/deployfunction/"+owner, nil)
+
+	response, err := c.Do(request)
+	content, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		return false, fmt.Errorf("Cutomer validation failed!")
+	}
+
+	if string(content) == "-401" {
+		return false, fmt.Errorf("Gihub user is not registered!")
+	}
+
+	if string(content) == "-403" {
+		return false, fmt.Errorf("You have reached to your maximum deployment limit!")
+	}
+
+	if string(content) == "-202" {
+		return true, nil
+	} else {
+		return false, fmt.Errorf("You have reached to your maximum deployment limit!")
+	}
+
 }
 
 func collect(pushEvent sdk.PushEvent, stack *stack.Services) error {

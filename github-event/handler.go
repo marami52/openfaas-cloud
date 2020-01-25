@@ -296,14 +296,11 @@ func forward(req []byte, function string, headers map[string]string) (string, in
 	return string(body), res.StatusCode, err
 }
 
-func validCustomer(customers []string, owner string) bool {
-	for _, customer := range customers {
-		if len(customer) > 0 &&
-			strings.EqualFold(customer, owner) {
-			return true
-		}
-	}
-	return false
+func validCustomer(owner string) (bool, error) {
+	// customer control is paased to git-tar
+	fmt.Println(owner)
+	return true, nil
+
 }
 
 // getCustomers reads a list of customers separated by new lines
@@ -352,13 +349,13 @@ func readBool(key string) bool {
 
 func validateCustomers(pushEvent *sdk.PushEvent, customersURL string) error {
 
-	customers, getErr := getCustomers(customersURL)
-	if getErr != nil {
-		return getErr
-	}
-
+	fmt.Sprintf(customersURL)
 	actor := pushEvent.Repository.Owner.Login
-	if !validCustomer(customers, actor) {
+	isCustomer, err := validCustomer(actor)
+	if err != nil {
+		return fmt.Errorf("Validation failed: %s", err)
+	}
+	if !isCustomer {
 
 		auditEvent := sdk.AuditEvent{
 			Message: "Customer not found",
@@ -369,8 +366,8 @@ func validateCustomers(pushEvent *sdk.PushEvent, customersURL string) error {
 		sdk.PostAudit(auditEvent)
 
 		return fmt.Errorf("%s",
-			fmt.Sprintf("Customer: %s not found in CUSTOMERS file via %s", actor,
-				customersURL))
+			fmt.Sprintf("Customer: %s not found in CUSTOMERS file via %t", actor,
+				isCustomer))
 	}
 	return nil
 }

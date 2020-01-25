@@ -11,13 +11,13 @@ environment:
   custom_templates: "https://github.com/openfaas-incubator/node8-express-template.git, https://github.com/openfaas-incubator/golang-http-template.git, https://github.com/openfaas-incubator/node10-express-template.git"
 
 # Security
-  customers_url: "https://raw.githubusercontent.com/openfaas/openfaas-cloud/master/CUSTOMERS"
+  customers_url: "https://raw.githubusercontent.com/marami52/openfaas-cloud-test/master/CUSTOMERS"
   basic_auth: true
   secret_mount_path: /var/openfaas/secrets
 
 # Container builder
-  repository_url: docker.io/ofcommunity/
-  push_repository_url: docker.io/ofcommunity/
+  repository_url: docker.io/rbrain/
+  push_repository_url: docker.io/rbrain/
   builder_url: http://of-builder.openfaas:8080/
 
 # Logging

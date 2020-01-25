@@ -6,12 +6,14 @@ functions:
   system-github-event:
     lang: go
     handler: ./github-event
-    image: functions/github-event:0.8.1
+    #image: functions/github-event:0.8.1
+    image: rbrain/github-event:0.8.2
     labels:
       openfaas-cloud: "1"
       role: openfaas-system
       com.openfaas.scale.zero: false
     environment:
+      axcel_url: "http://api.ironix.com"
       validate_hmac: true
       write_debug: true
       read_debug: true
@@ -48,12 +50,13 @@ functions:
     lang: dockerfile
     handler: ./git-tar
     # image: functions/of-git-tar:0.16.0
-    image: rbrain/gittar:latest
+    image: rbrain/of-git-tar:0.16.2
     labels:
       openfaas-cloud: "1"
       role: openfaas-system
       com.openfaas.scale.zero: false
     environment:
+      axcel_url: "http://api.ironix.com"
       read_timeout: 15m
       write_timeout: 15m
       write_debug: true
@@ -115,12 +118,13 @@ functions:
     lang: go
     handler: ./github-status
     # image: functions/github-status:0.3.6
-    image: rbrain/github-status:latest
+    image: rbrain/github-status:0.3.7
     labels:
       openfaas-cloud: "1"
       role: openfaas-system
       com.openfaas.scale.zero: false
     environment:
+      axcel_url: "http://api.ironix.com"
       write_debug: true
       read_debug: true
       combine_output: false

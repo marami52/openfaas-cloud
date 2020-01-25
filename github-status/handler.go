@@ -120,6 +120,7 @@ func getLogs(status *sdk.CommitStatus, event *sdk.Event) (string, error) {
 }
 
 func buildPublicStatusURL(status string, statusContext string, event *sdk.Event) string {
+	axcelURL := os.Getenv("axcel_url")
 	url := event.URL
 
 	if status == sdk.StatusSuccess {
@@ -136,8 +137,9 @@ func buildPublicStatusURL(status string, statusContext string, event *sdk.Event)
 				}
 				// for success status if gateway's public url id set the deployed
 				// function url is used in the commit status
-				serviceValue := sdk.FormatServiceName(event.Owner, event.Service)
-				url = publicURL + "function/" + serviceValue
+				// All links go to Axcel Dashboard
+				// serviceValue := sdk.FormatServiceName(event.Owner, event.Service)
+				url = axcelURL
 			}
 		} else { // For context Stack on success the gateway url is used
 			if len(gatewayPrettyURL) > 0 {
@@ -167,8 +169,8 @@ func buildPublicStatusURL(status string, statusContext string, event *sdk.Event)
 		}
 		url += "/" + event.Owner + "/" + event.Service + "/log?repoPath=" + event.Owner + "/" + event.Repository + "&commitSHA=" + event.SHA
 	}
-
-	return url
+	// all links to Axcel dashboard
+	return axcelURL
 }
 
 func reportToGithub(commitStatus *sdk.CommitStatus, event *sdk.Event) error {
